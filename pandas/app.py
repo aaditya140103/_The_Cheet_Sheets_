@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+from datetime import datetime
 
 # Set page config
 st.set_page_config(
@@ -9,8 +10,10 @@ st.set_page_config(
     layout="wide"
 )
 
-# Sidebar navigation
-st.sidebar.title("📚 Pandas Cheat Sheet")
+# --- Sidebar Navigation ---
+st.sidebar.title("🐼 Pandas Cheat Sheet")
+st.sidebar.markdown("Use this cheat sheet to quickly look up common Pandas operations.")
+
 section = st.sidebar.radio("Jump to Section", [
     "📘 Introduction",
     "📋 Creating DataFrames",
@@ -22,7 +25,7 @@ section = st.sidebar.radio("Jump to Section", [
     "⏱️ Time Series Basics"
 ])
 
-# Sample DataFrame for demos
+# --- Sample DataFrame for Demos ---
 def get_sample_df():
     df = pd.DataFrame({
         'Name': ['Alice', 'Bob', 'Charlie', 'David'],
@@ -32,26 +35,26 @@ def get_sample_df():
     })
     return df
 
-# Introduction
+# --- Content Area ---
 if section == "📘 Introduction":
     st.title("🐼 Introduction to Pandas")
     st.markdown("""
-    **Pandas** is a powerful Python library for data analysis and manipulation.
+    Pandas is a Python library for data manipulation and analysis.
 
+    **Core Data Structures:**
     - `Series`: One-dimensional labeled array.
-    - `DataFrame`: Two-dimensional labeled data structure.
+    - `DataFrame`: Two-dimensional labeled table (like a spreadsheet).
 
-    > Think of it like Excel in Python, but way more powerful!
+    It's widely used in data analysis, ML pipelines, and even finance.
     """)
-
     st.code("""
 import pandas as pd
 import numpy as np
     """, language="python")
 
-# Creating DataFrames
 elif section == "📋 Creating DataFrames":
     st.title("📋 Creating DataFrames")
+
     st.subheader("From Dictionary")
     st.code("""
 data = {
@@ -64,90 +67,90 @@ df = pd.DataFrame(data)
 
     st.subheader("From NumPy Array")
     st.code("""
-import numpy as np
 np_data = np.array([[1, 2], [3, 4]])
 df = pd.DataFrame(np_data, columns=['A', 'B'])
     """, language="python")
+    st.dataframe(pd.DataFrame(np.array([[1, 2], [3, 4]]), columns=['A', 'B']))
 
-# Data Inspection
+    st.subheader("From CSV File")
+    st.code("""
+df = pd.read_csv("your_file.csv")
+    """, language="python")
+
 elif section == "🔍 Data Inspection":
     st.title("🔍 Inspecting Your Data")
     df = get_sample_df()
-    st.dataframe(df)
 
-    st.subheader("Head & Tail")
-    st.code("""
-df.head()
-df.tail()
-    """, language="python")
+    st.subheader("👀 Preview Data")
+    st.dataframe(df.head())
 
-    st.subheader("Data Types & Info")
+    st.subheader("🔎 Info and Types")
     st.code("""
-df.dtypes
 df.info()
+df.dtypes
     """, language="python")
 
-    st.subheader("Summary Statistics")
-    st.code("df.describe(include='all')")
+    st.subheader("📐 Summary Stats")
     st.dataframe(df.describe(include='all'))
 
-# Indexing & Selection
 elif section == "🎯 Indexing & Selection":
     st.title("🎯 Indexing & Selection")
     df = get_sample_df()
-    st.dataframe(df)
 
-    st.subheader("Using `[]`, `.loc`, and `.iloc`")
+    st.subheader("Select Columns")
     st.code("""
-df['Name']            # Column
-
-# Row by label and position
-df.loc[0]
-df.iloc[0]
-
-# Subset
-df.loc[0:2, ['Name', 'Salary']]
+df['Name']
+df[['Name', 'Age']]
     """, language="python")
 
-# Data Cleaning
+    st.subheader("Select Rows")
+    st.code("""
+df.iloc[0]         # by position
+df.loc[0]          # by label
+    """, language="python")
+
+    st.subheader("Boolean Filtering")
+    st.code("""
+df[df['Salary'] > 60000]
+    """, language="python")
+
 elif section == "🧹 Data Cleaning":
-    st.title("🧹 Cleaning Data")
+    st.title("🧹 Data Cleaning")
     df = get_sample_df()
     df.loc[2, 'Salary'] = np.nan
     st.dataframe(df)
 
-    st.subheader("Handling Missing Values")
+    st.subheader("Detecting & Filling Missing Values")
     st.code("""
 df.isna()
 df.fillna(0)
-df.dropna()
     """, language="python")
 
-# Aggregation & Grouping
+    st.subheader("Dropping Missing Values")
+    st.code("df.dropna()", language="python")
+
 elif section == "📊 Aggregation & Grouping":
     st.title("📊 Aggregation & Grouping")
     df = get_sample_df()
-    st.dataframe(df)
 
-    st.subheader("Groupby")
-    st.code("""
-df.groupby('Department')['Salary'].mean()
-    """, language="python")
-    st.write(df.groupby('Department')['Salary'].mean())
+    st.subheader("Using groupby")
+    st.code("df.groupby('Department')['Salary'].mean()", language="python")
+    st.dataframe(df.groupby('Department')['Salary'].mean().reset_index())
 
-# Merging & Joining
 elif section == "🔗 Merging & Joining":
     st.title("🔗 Merging & Joining DataFrames")
-    st.subheader("Merge on Key")
+
+    st.subheader("Basic Merge")
     st.code("""
 df1 = pd.DataFrame({'ID': [1, 2], 'Name': ['Alice', 'Bob']})
 df2 = pd.DataFrame({'ID': [1, 2], 'Score': [90, 85]})
-merged = pd.merge(df1, df2, on='ID')
+pd.merge(df1, df2, on='ID')
     """, language="python")
 
-# Time Series Basics
 elif section == "⏱️ Time Series Basics":
     st.title("⏱️ Time Series Basics")
+
+    st.subheader("Creating a Time Index")
     st.code("""
 dates = pd.date_range('2023-01-01', periods=5)
 df = pd.DataFrame({'Date': dates, 'Value': range(5)})
@@ -158,5 +161,9 @@ df.set_index('Date', inplace=True)
     ts_df = pd.DataFrame({'Date': dates, 'Value': range(5)}).set_index('Date')
     st.line_chart(ts_df)
 
-st.markdown("---")
-st.caption("Created with ❤️ by Aditya's ML Cheat Sheet")
+# Footer
+st.markdown("""
+---
+Made with ❤️ by **Aditya's ML Cheat Sheet** 
+[📘 GitHub](https://github.com/) | [📬 Feedback](mailto:you@example.com)
+""")
